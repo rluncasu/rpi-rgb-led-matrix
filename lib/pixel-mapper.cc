@@ -174,12 +174,8 @@ public:
   virtual const char *GetName() const { return "Z-mapper"; }
 
   virtual bool SetParameters(int chain, int parallel, const char *param) {
-    if (chain < 3) {
-      fprintf(stderr, "Z-mapper: need at least --led-chain=6 for useful folding\n");
-      return false;
-    }
-    if (chain % 3 != 0) {
-      fprintf(stderr, "U-mapper: Chain (--led-chain) needs to be divisible by three\n");
+    if (chain != 6 && parallel != 1) {
+      fprintf(stderr, "Z-mapper: --led-parallel=1 --led-chain=6\n");
       return false;
     }
     parallel_ = parallel;
@@ -203,19 +199,44 @@ public:
   virtual void MapVisibleToMatrix(int matrix_width, int matrix_height,
                                   int x, int y,
                                   int *matrix_x, int *matrix_y) const {
-    const int panel_height = matrix_height / parallel_;
-    const int visible_width = (matrix_width / 64) * 32;
-    const int slab_height = 2 * panel_height;   // one folded u-shape
-    const int base_y = (y / slab_height) * panel_height;
-    y %= slab_height;
-    if (y < panel_height) {
-      x += matrix_width / 2;
-    } else {
-      x = visible_width - x - 1;
-      y = slab_height - y - 1;
+    // const int panel_height = matrix_height / parallel_;
+    // const int visible_width = (matrix_width / 64) * 32;
+    // const int slab_height = 2 * panel_height;   // one folded u-shape
+    // const int base_y = (y / slab_height) * panel_height;
+    // y %= slab_height;
+    // if (y < panel_height) {
+    //   x += matrix_width / 2;
+    // } else {
+    //   x = visible_width - x - 1;
+    //   y = slab_height - y - 1;
+    // }
+    const visible_height = 3 * matrix_height;
+    const visible_width = matrix_width / 3;
+
+    const r1_x = visible_width;
+    const r1_y = matrix_height;
+
+    const r2_x = visible_width * 2;
+    const r2_y = matrix_height * 2;
+
+    const r3_x = visible_width * 3;
+    const r3_y = matrix_height * 3;
+
+    // first row --> do nothing
+
+    // second row
+    if (y > r1_y && y <= r2_y) {
+      y = r2_y - y + 1;
+      x = x - r2_x;
+    }
+
+    // third row
+    if (y > r2_y) {
+      x = x + r3_x -1;
+      y = y - r2_y;
     }
     *matrix_x = x;
-    *matrix_y = base_y + y;
+    *matrix_y = y;
   }
 
 private:
