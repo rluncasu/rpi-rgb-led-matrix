@@ -210,30 +210,28 @@ public:
     //   x = visible_width - x - 1;
     //   y = slab_height - y - 1;
     // }
-    const visible_height = 3 * matrix_height;
-    const visible_width = matrix_width / 3;
+    const int visible_height = 3 * matrix_height;
+    const int visible_width = matrix_width / 3;
 
-    const r1_x = visible_width;
-    const r1_y = matrix_height;
+    const int r1_x = visible_width;
+    const int r1_y = matrix_height;
 
-    const r2_x = visible_width * 2;
-    const r2_y = matrix_height * 2;
+    const int r2_x = visible_width * 2;
+    const int r2_y = matrix_height * 2;
 
-    const r3_x = visible_width * 3;
-    const r3_y = matrix_height * 3;
-
-    // first row --> do nothing
+    const int r3_x = visible_width * 3;
+    const int r3_y = matrix_height * 3;
 
     // second row
-    if (y > r1_y && y <= r2_y) {
-      y = r2_y - y + 1;
-      x = x - r2_x;
-    }
-
-    // third row
-    if (y > r2_y) {
-      x = x + r3_x -1;
-      y = y - r2_y;
+    if (y >= r1_y && y < 2*r1_y) {
+      y = y - r1_y;
+      x = 2*r1_x - x - 1;
+    } else if (y >= r2_y) { // third row
+      y = 3*r1_y -y - 1;
+      x = 2*r1_x + x;
+    } else { // first row
+      y = r1_y - y - 1;
+      x = x;
     }
     *matrix_x = x;
     *matrix_y = y;
