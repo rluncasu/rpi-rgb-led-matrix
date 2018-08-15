@@ -179,7 +179,7 @@ public:
       return false;
     }
     if (chain % 3 != 0) {
-      fprintf(stderr, "U-mapper: Chain (--led-chain) needs to be divisible by two\n");
+      fprintf(stderr, "U-mapper: Chain (--led-chain) needs to be divisible by three\n");
       return false;
     }
     parallel_ = parallel;
