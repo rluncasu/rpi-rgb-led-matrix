@@ -162,6 +162,85 @@ private:
   int parallel_;
 };
 
+//  The Z Shape
+//    [<][<] }----- Raspberry Pi connector
+//    [>][>]
+//    [<][<]
+
+class ZArrangementMapper : public PixelMapper {
+public:
+  ZArrangementMapper() : parallel_(1) {}
+
+  virtual const char *GetName() const { return "Z-mapper"; }
+
+  virtual bool SetParameters(int chain, int parallel, const char *param) {
+    if (chain != 6 && parallel != 1) {
+      fprintf(stderr, "Z-mapper: --led-parallel=1 --led-chain=6\n");
+      return false;
+    }
+    parallel_ = parallel;
+    return true;
+  }
+
+  virtual bool GetSizeMapping(int matrix_width, int matrix_height,
+                              int *visible_width, int *visible_height)
+    const {
+    *visible_width = matrix_width / 3;
+    *visible_height = matrix_height * 3;
+    // if (matrix_height % parallel_ != 0) {
+    //   fprintf(stderr, "%s For parallel=%d we would expect the height=%d "
+    //           "to be divisible by %d ??\n",
+    //           GetName(), parallel_, matrix_height, parallel_);
+    //   return false;
+    // }
+    return true;
+  }
+
+  virtual void MapVisibleToMatrix(int matrix_width, int matrix_height,
+                                  int x, int y,
+                                  int *matrix_x, int *matrix_y) const {
+    // const int panel_height = matrix_height / parallel_;
+    // const int visible_width = (matrix_width / 64) * 32;
+    // const int slab_height = 2 * panel_height;   // one folded u-shape
+    // const int base_y = (y / slab_height) * panel_height;
+    // y %= slab_height;
+    // if (y < panel_height) {
+    //   x += matrix_width / 2;
+    // } else {
+    //   x = visible_width - x - 1;
+    //   y = slab_height - y - 1;
+    // }
+    const int visible_height = 3 * matrix_height;
+    const int visible_width = matrix_width / 3;
+
+    const int r1_x = visible_width;
+    const int r1_y = matrix_height;
+
+    const int r2_x = visible_width * 2;
+    const int r2_y = matrix_height * 2;
+
+    const int r3_x = visible_width * 3;
+    const int r3_y = matrix_height * 3;
+
+    // second row
+    if (y >= r1_y && y < 2*r1_y) {
+      y = y - r1_y;
+      x = 2*r1_x - x - 1;
+    } else if (y >= r2_y) { // third row
+      y = 3*r1_y -y - 1;
+      x = 2*r1_x + x;
+    } else { // first row
+      y = r1_y - y - 1;
+      x = x;
+    }
+    *matrix_x = x;
+    *matrix_y = y;
+  }
+
+private:
+  int parallel_;
+};
+
 typedef std::map<std::string, PixelMapper*> MapperByName;
 static void RegisterPixelMapperInternal(MapperByName *registry,
                                         PixelMapper *mapper) {
@@ -178,6 +257,7 @@ static MapperByName *CreateMapperMap() {
   // Register all the default PixelMappers here.
   RegisterPixelMapperInternal(result, new RotatePixelMapper());
   RegisterPixelMapperInternal(result, new UArrangementMapper());
+  RegisterPixelMapperInternal(result, new ZArrangementMapper());
   return result;
 }
 
