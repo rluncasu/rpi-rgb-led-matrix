@@ -199,11 +199,10 @@ public:
   virtual void MapVisibleToMatrix(int matrix_width, int matrix_height,
                                   int x, int y,
                                   int *matrix_x, int *matrix_y) const {
-    const int visible_height = 3 * matrix_height;
     const int visible_width = matrix_width / 3;
 
     // flip x
-    x = visible_width - x;
+    x = visible_width - x - 1;
 
     // second row
     if (y >= matrix_height && y < 2 * matrix_height) {
